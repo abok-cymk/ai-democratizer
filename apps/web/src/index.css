@@ -1,0 +1,256 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light theme color tokens */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    --radius: 0.5rem;
+
+    /* Custom AI Democratizer tokens */
+    --ai-gradient-primary: linear-gradient(135deg, #3b82f6 0%, #a855f7 50%, #22c55e 100%);
+    --ai-gradient-secondary: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #15803d 100%);
+    --ai-shadow-soft: 0 4px 12px rgba(59, 130, 246, 0.1);
+    --ai-shadow-medium: 0 8px 25px rgba(59, 130, 246, 0.15);
+    --ai-shadow-strong: 0 16px 40px rgba(59, 130, 246, 0.2);
+  }
+
+  .dark {
+    /* Dark theme color tokens */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+
+    /* Dark theme AI tokens */
+    --ai-gradient-primary: linear-gradient(135deg, #60a5fa 0%, #c084fc 50%, #4ade80 100%);
+    --ai-gradient-secondary: linear-gradient(135deg, #3b82f6 0%, #a855f7 50%, #22c55e 100%);
+    --ai-shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --ai-shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.4);
+    --ai-shadow-strong: 0 16px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Enhanced focus styles for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted/30;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) hsl(var(--muted) / 0.3);
+  }
+
+  /* Reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    :root {
+      --border: 0 0% 0%;
+      --ring: 0 0% 0%;
+    }
+
+    .dark {
+      --border: 0 0% 100%;
+      --ring: 0 0% 100%;
+    }
+  }
+}
+
+@layer components {
+  /* AI-specific component utilities */
+  .ai-gradient-text {
+    background: var(--ai-gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .ai-gradient-border {
+    position: relative;
+    background: var(--ai-gradient-primary);
+    border-radius: var(--radius);
+    padding: 1px;
+  }
+
+  .ai-gradient-border > * {
+    @apply bg-background rounded-[calc(var(--radius)-1px)];
+  }
+
+  .ai-card-glow {
+    box-shadow: var(--ai-shadow-soft);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .ai-card-glow:hover {
+    box-shadow: var(--ai-shadow-medium);
+  }
+
+  .ai-glass {
+    @apply backdrop-blur-md bg-background/80 border border-border/50;
+  }
+
+  /* Interactive elements */
+  .ai-interactive {
+    @apply transition-all duration-200 ease-in-out;
+    @apply hover:scale-[1.02] hover:shadow-lg;
+    @apply active:scale-[0.98] active:shadow-sm;
+  }
+
+  /* Loading skeleton */
+  .ai-skeleton {
+    @apply animate-pulse bg-muted/50 rounded;
+  }
+
+  /* Achievement badge styles */
+  .ai-badge-bronze {
+    @apply bg-gradient-to-r from-amber-600 to-amber-800 text-white;
+  }
+
+  .ai-badge-silver {
+    @apply bg-gradient-to-r from-gray-400 to-gray-600 text-white;
+  }
+
+  .ai-badge-gold {
+    @apply bg-gradient-to-r from-yellow-400 to-yellow-600 text-white;
+  }
+
+  .ai-badge-platinum {
+    @apply bg-gradient-to-r from-blue-400 to-purple-600 text-white;
+  }
+}
+
+@layer utilities {
+  /* Screen reader only content */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+
+  /* Text selection colors */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  ::-moz-selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  /* Print styles */
+  @media print {
+    * {
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
+
+    .no-print {
+      display: none !important;
+    }
+  }
+}

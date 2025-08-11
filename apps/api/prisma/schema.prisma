@@ -1,0 +1,471 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// USER & AUTHENTICATION
+// ==========================================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  firstName String
+  lastName  String
+  avatar    String?
+  bio       String?
+  location  String?
+  website   String?
+  
+  // Authentication
+  password    String
+  emailVerified Boolean @default(false)
+  verificationToken String?
+  resetToken  String?
+  resetTokenExpiry DateTime?
+  
+  // Profile & Gamification
+  level      Int @default(1)
+  xp         Int @default(0)
+  streak     Int @default(0)
+  lastActive DateTime @default(now())
+  
+  // Settings
+  theme      String @default("system") // light, dark, system
+  language   String @default("en")
+  
+  // Permissions
+  role       String @default("USER") // USER, MODERATOR, ADMIN, SUPER_ADMIN
+  isActive   Boolean @default(true)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  enrollments       CourseEnrollment[]
+  playgroundSessions PlaygroundSession[]
+  posts             Post[]
+  comments          Comment[]
+  likes             Like[]
+  achievements      UserAchievement[]
+  campaignParticipations CampaignParticipation[]
+  
+  @@map("users")
+}
+
+// ==========================================
+// LEARNING & COURSES
+// ==========================================
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  content     String   // JSON content
+  slug        String   @unique
+  thumbnail   String?
+  
+  // Classification
+  category    String   // FUNDAMENTALS, MACHINE_LEARNING, etc.
+  difficulty  String   // BEGINNER, INTERMEDIATE, ADVANCED
+  tags        String   @default("[]")
+  
+  // Metadata
+  duration    Int      // minutes
+  rating      Float    @default(0)
+  ratingCount Int      @default(0)
+  
+  // Visibility
+  isPublished Boolean  @default(false)
+  isFeatured  Boolean  @default(false)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  lessons     Lesson[]
+  enrollments CourseEnrollment[]
+  
+  @@map("courses")
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  content     String   // JSON content
+  order       Int
+  duration    Int      // minutes
+  
+  // Media
+  videoUrl    String?
+  materials   String[] // URLs to downloadable materials
+  
+  // Visibility
+  isPublished Boolean  @default(false)
+  isFree      Boolean  @default(false)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  courseId    String
+  course      Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progress    LessonProgress[]
+  
+  @@map("lessons")
+}
+
+model CourseEnrollment {
+  id           String   @id @default(cuid())
+  progress     Float    @default(0) // 0-100
+  completedAt  DateTime?
+  
+  // Timestamps
+  enrolledAt   DateTime @default(now())
+  lastAccessed DateTime @default(now())
+  
+  // Relations
+  userId       String
+  user         User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId     String
+  course       Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, courseId])
+  @@map("course_enrollments")
+}
+
+model LessonProgress {
+  id          String   @id @default(cuid())
+  completed   Boolean  @default(false)
+  timeSpent   Int      @default(0) // seconds
+  completedAt DateTime?
+  
+  // Timestamps
+  startedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  userId      String
+  lessonId    String
+  lesson      Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, lessonId])
+  @@map("lesson_progress")
+}
+
+enum CourseCategory {
+  FUNDAMENTALS
+  MACHINE_LEARNING
+  DEEP_LEARNING
+  NLP
+  COMPUTER_VISION
+  ETHICS
+  APPLICATIONS
+  TOOLS
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+// ==========================================
+// AI PLAYGROUND
+// ==========================================
+
+model PlaygroundSession {
+  id          String   @id @default(cuid())
+  title       String   @default("Untitled Session")
+  description String?
+  
+  // Code & Configuration
+  code        String
+  language    String   @default("python")
+  model       String   @default("gpt-3.5-turbo")
+  parameters  String   // JSON parameters
+  
+  // Results
+  output      String?
+  error       String?
+  executionTime Int?   // milliseconds
+  
+  // Visibility
+  isPublic    Boolean  @default(false)
+  isTemplate  Boolean  @default(false)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("playground_sessions")
+}
+
+// ==========================================
+// COMMUNITY & SOCIAL
+// ==========================================
+
+model Post {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  excerpt     String?
+  slug        String   @unique
+  
+  // Classification
+  category    PostCategory
+  tags        String[]
+  
+  // Engagement
+  likesCount  Int      @default(0)
+  commentsCount Int    @default(0)
+  viewsCount  Int      @default(0)
+  
+  // Status
+  isPublished Boolean  @default(true)
+  isPinned    Boolean  @default(false)
+  isLocked    Boolean  @default(false)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  authorId    String
+  author      User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments    Comment[]
+  likes       Like[]
+  
+  @@map("posts")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  
+  // Engagement
+  likesCount Int     @default(0)
+  
+  // Status
+  isDeleted Boolean @default(false)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  authorId  String
+  author    User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  likes     Like[]
+  
+  @@map("comments")
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  
+  // Relations
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String?
+  post      Post? @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentId String?
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, postId])
+  @@unique([userId, commentId])
+  @@map("likes")
+}
+
+enum PostCategory {
+  QUESTION
+  DISCUSSION
+  SHOWCASE
+  ANNOUNCEMENT
+  HELP
+}
+
+// ==========================================
+// CAMPAIGNS & ADVOCACY
+// ==========================================
+
+model Campaign {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  content     String   // Detailed content/instructions
+  banner      String?
+  
+  // Classification
+  category    CampaignCategory
+  tags        String[]
+  
+  // Timeline
+  startDate   DateTime
+  endDate     DateTime
+  status      CampaignStatus @default(DRAFT)
+  
+  // Goals & Metrics
+  targetParticipants Int @default(100)
+  participantCount   Int @default(0)
+  
+  // Activities & Rewards
+  activities  String   // JSON activities with points
+  totalPoints Int      @default(0)
+  
+  // Visibility
+  isPublic    Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  organizerId String
+  participations CampaignParticipation[]
+  
+  @@map("campaigns")
+}
+
+model CampaignParticipation {
+  id          String   @id @default(cuid())
+  progress    Float    @default(0) // 0-100
+  pointsEarned Int     @default(0)
+  completedActivities String[] // Activity IDs completed
+  
+  // Status
+  isActive    Boolean  @default(true)
+  completedAt DateTime?
+  
+  // Timestamps
+  joinedAt    DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, campaignId])
+  @@map("campaign_participations")
+}
+
+enum CampaignCategory {
+  AWARENESS
+  ADVOCACY
+  EDUCATION
+  COMPETITION
+  HACKATHON
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+  CANCELLED
+}
+
+// ==========================================
+// GAMIFICATION & ACHIEVEMENTS
+// ==========================================
+
+model Achievement {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String
+  icon        String
+  category    AchievementCategory
+  
+  // Requirements
+  requirements String  // JSON requirements
+  points      Int      @default(0)
+  rarity      Rarity   @default(COMMON)
+  
+  // Status
+  isActive    Boolean  @default(true)
+  
+  // Timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  userAchievements UserAchievement[]
+  
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id          String   @id @default(cuid())
+  unlockedAt  DateTime @default(now())
+  
+  // Relations
+  userId      String
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId String
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, achievementId])
+  @@map("user_achievements")
+}
+
+enum AchievementCategory {
+  LEARNING
+  COMMUNITY
+  PLAYGROUND
+  CAMPAIGN
+  STREAK
+  MILESTONE
+}
+
+enum Rarity {
+  COMMON
+  UNCOMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+// ==========================================
+// SYSTEM & METADATA
+// ==========================================
+
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  category  String   @default("general")
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("system_settings")
+}
+
+// Indexes for better performance
+// These will be added when we run migrations

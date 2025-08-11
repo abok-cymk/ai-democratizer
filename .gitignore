@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.vs/
+.ipynb_checkpoints/
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# Model files
+*.onnx
+*.pt
+*.pth
+*.h5
+*.pb
+*.tflite
+
+# Data files
+data/
+datasets/
+*.csv
+*.npy
+*.npz
+
+# Configuration
+.env
+.env.local
+.env.development
+.env.production
+credentials.json
+secrets/
+
+# OS specific
+Thumbs.db
+.DS_Store
+
+# Node.js (if you have a frontend)
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+# Distribution / packaging
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
